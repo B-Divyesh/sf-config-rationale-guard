@@ -1,0 +1,15 @@
+{
+  "slug": "config-rationale-guard",
+  "title": "Config Rationale Guard",
+  "artifact_class": "cli",
+  "job": "Keep configuration decisions and exceptions visible, valid, and reviewable as strict JSON, YAML, and TOML files evolve.",
+  "smallest_useful_product": "An offline CLI that pairs strict configuration with adjacent rationale annotations, validates schema and annotation targets, and renders a PR diff of changed decisions.",
+  "success_measure": "90% of policy-sensitive setting changes carry a linked rationale and stale rationales are detected in CI.",
+  "monetization": "one-time",
+  "constraints": [
+    "Never include config values in reports",
+    "Never rewrite source configuration",
+    "Schema behavior is explicit per format",
+    "No telemetry"
+  ]
+}
