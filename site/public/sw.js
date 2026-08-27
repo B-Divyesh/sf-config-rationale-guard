@@ -1,11 +1,14 @@
-const CACHE = 'crg-shell-v3';
-const STATIC_SHELL = ['/', '/privacy/', '/terms/', '/rationale-press.webp', '/mark.svg', '/fraunces-latin-600.woff2'];
+const CACHE = 'crg-shell-v4';
+const STATIC_SHELL = ['/privacy/', '/terms/', '/rationale-press.webp', '/mark.svg', '/fraunces-latin-600.woff2'];
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
-    const response = await fetch('/shell-assets.json', { cache: 'no-store' });
-    const { assets = [] } = await response.json();
+    const homepage = await fetch('/', { cache: 'no-store' });
+    const html = await homepage.clone().text();
+    const assets = [...html.matchAll(/(?:src|href)="(\/assets\/[^"?]+)"/g)]
+      .map((match) => match[1]);
     const cache = await caches.open(CACHE);
-    await cache.addAll([...STATIC_SHELL, '/shell-assets.json', ...assets]);
+    await cache.put('/', homepage);
+    await cache.addAll([...STATIC_SHELL, ...assets]);
   })());
   self.skipWaiting();
 });

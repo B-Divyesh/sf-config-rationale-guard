@@ -20,7 +20,7 @@ Repaired QA report `412b575d8a6b450b031ebb2d9e4c237bb1f26ccd` for candidate
   `X-Frame-Options: DENY`, `Permissions-Policy`, nosniff, and Referrer-Policy.
   `_headers` remains as parity metadata for compatible static hosts.
 - The service worker now precaches a generated list of hashed JS/CSS shell
-files plus local pages/assets under a new `crg-shell-v3` cache. A controlled
+files plus local pages/assets under a new `crg-shell-v4` cache. A controlled
   offline mobile reload has no failed-resource console errors.
 - Made the horizontally scrollable install command keyboard-focusable; axe is
   now clean at desktop and mobile.
@@ -37,8 +37,7 @@ cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty
 ```
 
 `npm run build` produces `dist/bin/crg` and static deployment root `dist/site`.
-The static root includes both `staticwebapp.config.json` and the generated
-`shell-assets.json`; deploy it with:
+The static root includes `staticwebapp.config.json`; deploy it with:
 
 ```sh
 /opt/fleet/lib/deploy-static.sh config-rationale-guard dist/site
