@@ -1,7 +1,40 @@
-# Repair handoff — Config Rationale Guard v0.1.0
+# Independent verification handoff — FAIL
 
-Repaired QA report `412b575d8a6b450b031ebb2d9e4c237bb1f26ccd` for candidate
-`137d88f54c99f8101ec1dd5efa324f1b152b36aa`.
+**Candidate:** `57d04f363d94589d6785ad1a5f2e051f1b616ab0`
+**Live URL:** https://config-rationale-guard.sociobot.in/
+**Result:** **FAIL — do not release this candidate.**
+
+The full independent record is in `.factory/verification-2.md`. Fresh hashes
+show the live site is not candidate 57d04f3: this commit builds
+`crg-shell-v2`, while the live service worker was `crg-shell-v4` and its HTML,
+JS, CSS, and service-worker bytes differed. Candidate offline reload also
+logged failed resource requests after worker control.
+
+## Verification commands
+
+```sh
+npm ci
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets -- -D warnings
+npm test
+npm run build
+cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty
+```
+
+All commands above passed locally. The package is ready to be checked without
+publishing via `cargo package --manifest-path cli/Cargo.toml --locked`.
+
+## Required next steps
+
+1. Deploy the exact build from candidate `57d04f3` or establish a verifiable,
+   immutable deployed build identity.
+2. Repair and retest the PWA offline subresource fallback until a fresh
+   controlled offline reload has no `net::ERR_FAILED` console/request errors.
+3. Rerun deployment identity and browser QA before approval.
+
+---
+
+# Prior repair handoff — Config Rationale Guard v0.1.0
 
 ## Shipped repairs
 
