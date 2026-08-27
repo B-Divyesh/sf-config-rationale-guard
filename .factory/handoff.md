@@ -1,4 +1,21 @@
-# Build handoff — Config Rationale Guard v0.1.0
+# Verification status — FAIL
+
+Independent QA on 2026-08-27 rejected candidate
+`137d88f54c99f8101ec1dd5efa324f1b152b36aa`. `crg check --schema` leaks raw
+configuration values in schema-validation reports, violating the brief's
+privacy constraint. The live URL https://config-rationale-guard.sociobot.in
+is byte-identical to this candidate and is affected.
+
+See `.factory/verification.md` for exact reproduction and all evidence. Do
+not publish or approve this candidate. Required remediation: value-free schema
+errors plus regression tests; fix the 390 px horizontal overflow; configure
+the deployed cache and response-policy headers; then rerun independent QA.
+
+Verified commands: `npm ci`, `cargo fmt --all -- --check`, `cargo clippy
+--workspace --all-targets -- -D warnings`, `npm test`, `npm run build`, and
+`cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty`.
+
+# Original build handoff — Config Rationale Guard v0.1.0
 
 ## Shipped
 
