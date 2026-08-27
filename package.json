@@ -1,0 +1,22 @@
+{
+  "name": "config-rationale-guard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --config site/vite.config.ts",
+    "test": "cargo test --workspace && npm run test:site",
+    "test:site": "tsc -p site/tsconfig.json && vitest run --config site/vitest.config.ts",
+    "build:cli": "cargo build --release --locked && mkdir -p dist/bin && cp target/release/crg dist/bin/crg",
+    "build:site": "vite build --config site/vite.config.ts",
+    "build": "npm run clean && npm run build:cli && npm run build:site",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "preview": "vite preview --config site/vite.config.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.3",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f3ebd7" />
+    <meta name="description" content="Keep configuration decisions reviewable beside strict JSON, YAML, and TOML with an offline CLI." />
+    <title>Config Rationale Guard — Keep the why beside the config</title>
+    <link rel="icon" href="/mark.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fraunces-latin-600.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/rationale-press.webp" as="image" type="image/webp" fetchpriority="high" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="offline-note" id="offline-note" role="status" hidden>
+      Offline. The local demo still works; license checks will resume later.
+    </div>
+    <header class="site-header">
+      <a class="wordmark" href="/" aria-label="Config Rationale Guard home"><span class="wordmark-mark" aria-hidden="true">CR</span><span>Rationale Guard</span></a>
+      <nav aria-label="Primary navigation">
+        <a href="#workflow">Workflow</a>
+        <a href="#demo">Try it</a>
+        <a href="#team">Team</a>
+        <a class="nav-install" href="#install">Install</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="kicker"><span>01</span> Offline config governance</p>
+          <h1 id="hero-title">Keep the <em>why</em><br />beside the config.</h1>
+          <p class="hero-lede">A small CLI that makes policy-sensitive settings carry their decision trail—without invalid comment keys, leaked values, or a new config language.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#install">Install the CLI</a>
+            <a class="text-link" href="#demo">Try the local checker <span aria-hidden="true">↓</span></a>
+          </div>
+          <ul class="proof-strip" aria-label="Product guarantees">
+            <li>JSON · YAML · TOML</li>
+            <li>JSON Schema</li>
+            <li>Zero telemetry</li>
+          </ul>
+        </div>
+        <figure class="hero-art">
+          <span class="plate-label" aria-hidden="true">RATIONALE / CONFIG</span>
+          <img src="/rationale-press.webp" width="1280" height="853" alt="Risograph collage of two overlapping review sheets, one structured like config and one marked with a human approval stamp" fetchpriority="high" />
+          <figcaption>Two plates. One reviewable decision.</figcaption>
+        </figure>
+      </section>
+
+      <section class="manifesto" aria-label="Product summary">
+        <p>The config remains strict.</p>
+        <p>The reason remains attached.</p>
+        <p>The report reveals no values.</p>
+      </section>
+
+      <section class="workflow section" id="workflow" aria-labelledby="workflow-title">
+        <div class="section-heading">
+          <p class="kicker"><span>02</span> The review loop</p>
+          <h2 id="workflow-title">A sidecar, not a side quest.</h2>
+          <p>Human context gets its own typed record. Your source files keep every comment, space, and strict parser they already have.</p>
+        </div>
+        <ol class="steps">
+          <li><span class="step-number">1</span><div><h3>Initialize</h3><p>Create adjacent decision records for config leaves.</p><code>crg init agent.json</code></div></li>
+          <li><span class="step-number">2</span><div><h3>Explain & stamp</h3><p>Write the rationale, then bind it to the reviewed value with a one-way fingerprint.</p><code>crg stamp agent.json</code></div></li>
+          <li><span class="step-number">3</span><div><h3>Guard the change</h3><p>Fail CI on missing, orphaned, overdue, schema-invalid, or stale decisions.</p><code>crg check agent.json --schema schema.json</code></div></li>
+          <li><span class="step-number">4</span><div><h3>Review the why</h3><p>Render changed paths and rationale—not secret-bearing values.</p><code>crg diff old/agent.json agent.json</code></div></li>
+        </ol>
+      </section>
+
+      <section class="demo section" id="demo" aria-labelledby="demo-title">
+        <div class="section-heading demo-heading">
+          <div>
+            <p class="kicker"><span>03</span> Browser proof</p>
+            <h2 id="demo-title">Try a decision check.</h2>
+          </div>
+          <p>Runs entirely in this tab. Edit a value to make the existing rationale stale, or repair the rationale and stamp it locally.</p>
+        </div>
+        <form id="demo-form" class="review-desk" novalidate>
+          <div class="editor-sheet config-sheet">
+            <div class="sheet-header"><label for="config-input">agent.json</label><span>strict config</span></div>
+            <textarea id="config-input" name="config" spellcheck="false" autocapitalize="off">{
+  "permissions": {
+    "shell": false
+  },
+  "retries": 2
+}</textarea>
+          </div>
+          <div class="editor-sheet rationale-sheet">
+            <div class="sheet-header"><label for="rationale-input">agent.json.rationale.json</label><span>decision trail</span></div>
+            <textarea id="rationale-input" name="rationale" spellcheck="false" autocapitalize="off">{
+  "rules": [
+    { "pattern": "/permissions/**" }
+  ],
+  "decisions": [{
+    "path": "/permissions/shell",
+    "rationale": "Shell stays off for untrusted tasks.",
+    "policy": "SEC-12",
+    "valueHash": ""
+  }]
+}</textarea>
+          </div>
+          <div class="demo-actions">
+            <button class="button button-primary" type="submit">Run local check</button>
+            <button class="button button-paper" type="button" id="stamp-demo">Stamp reviewed values</button>
+            <button class="text-button" type="button" id="reset-demo">Reset example</button>
+          </div>
+          <div class="result-panel" id="demo-result" role="status" aria-live="polite" tabindex="-1">
+            <span class="result-stamp" aria-hidden="true">READY</span>
+            <div><strong>Ready to inspect.</strong><p>Choose “Run local check.” No config data leaves this page.</p></div>
+          </div>
+        </form>
+      </section>
+
+      <section class="install section" id="install" aria-labelledby="install-title">
+        <div class="install-copy">
+          <p class="kicker"><span>04</span> Own the guardrail</p>
+          <h2 id="install-title">One binary.<br />No account.</h2>
+          <p>Build from source today. Release binaries can drop into any CI job; output is human-readable by default and JSON with one flag.</p>
+        </div>
+        <div class="terminal-block" aria-label="Installation commands">
+          <div class="terminal-top"><span>INSTALL / SOURCE</span><span aria-hidden="true">● ●</span></div>
+          <pre><code><span class="prompt">$</span> cargo install --git \
+  https://github.com/B-Divyesh/sf-config-rationale-guard
+
+<span class="prompt">$</span> crg check agent.json --json
+<span class="ok">PASS</span> 12 decisions · 100% coverage</code></pre>
+          <button class="copy-button" type="button" data-copy="cargo install --git https://github.com/B-Divyesh/sf-config-rationale-guard" aria-label="Copy install command">Copy command</button>
+        </div>
+      </section>
+
+      <section class="team section" id="team" aria-labelledby="team-title">
+        <div class="team-ticket">
+          <div>
+            <p class="kicker"><span>05</span> Team unlock</p>
+            <h2 id="team-title">Standardize the ritual.</h2>
+            <p>The full guard is free. Pay once for maintainable policy presets and copy-ready CI review recipes for GitHub Actions and GitLab CI.</p>
+            <ul class="check-list">
+              <li>Agent and CI policy path presets</li>
+              <li>Pull-request decision summary recipes</li>
+              <li>Future Team recipe updates</li>
+            </ul>
+          </div>
+          <div class="price-block">
+            <p class="price"><span>$</span>49</p>
+            <p>one-time purchase</p>
+            <a class="button button-primary" id="buy-link" href="https://api.sociobot.in/api/v1/products/config-rationale-guard/checkout">Buy Team unlock</a>
+            <p class="merchant">Secure hosted checkout. Sociobot/Dodo is merchant of record.</p>
+          </div>
+        </div>
+
+        <div class="license-panel" id="license-panel">
+          <div>
+            <h3>Already purchased?</h3>
+            <p>Paste the license token from your receipt to restore Team recipes on this device.</p>
+          </div>
+          <form id="license-form" class="license-form">
+            <label for="license-input">License token</label>
+            <div><input id="license-input" name="license" autocomplete="off" required /><button class="button button-paper" type="submit">Verify license</button></div>
+          </form>
+          <p id="license-status" class="license-status" role="status" aria-live="polite">Free edition active.</p>
+        </div>
+
+        <div class="unlock-content" id="unlock-content" hidden>
+          <div><span class="unlock-mark" aria-hidden="true">✓</span><h3>Team recipes unlocked</h3><p>Your cached license keeps these available offline. Verification occurs at most once per day.</p></div>
+          <div class="unlock-actions"><button class="button button-primary" type="button" id="copy-team-recipe">Copy GitHub Actions recipe</button><button class="button button-paper" type="button" id="copy-team-policy">Copy agent policy preset</button></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div><a class="wordmark" href="/"><span class="wordmark-mark" aria-hidden="true">CR</span><span>Rationale Guard</span></a><p>Decision trails for strict config. Built by the Param Factory.</p></div>
+      <nav aria-label="Legal and project links"><a href="https://github.com/B-Divyesh/sf-config-rationale-guard">Source</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></nav>
+      <p>© 2026 Sociobot · MIT</p>
+    </footer>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
