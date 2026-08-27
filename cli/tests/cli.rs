@@ -102,6 +102,45 @@ fn schema_and_duplicate_json_are_rejected() {
 }
 
 #[test]
+fn schema_reports_redact_the_failing_value_in_human_and_json_output() {
+    const SECRET: &str = "QA_SCHEMA_SECRET_DO_NOT_REPORT_7c75506b";
+    let directory = tempdir().unwrap();
+    let config = directory.path().join("secrets.json");
+    let schema = directory.path().join("schema.json");
+    fs::write(&config, format!(r#"{{"token":"{SECRET}"}}"#)).unwrap();
+    fs::write(
+        &schema,
+        r#"{"type":"object","properties":{"token":{"type":"integer"}}}"#,
+    )
+    .unwrap();
+    crg()
+        .args(["init", config.to_str().unwrap()])
+        .assert()
+        .success();
+
+    for output in [false, true] {
+        let mut command = crg();
+        command.args([
+            "check",
+            config.to_str().unwrap(),
+            "--schema",
+            schema.to_str().unwrap(),
+        ]);
+        if output {
+            command.arg("--json");
+        }
+        command
+            .assert()
+            .code(1)
+            .stdout(predicate::str::contains("schema_violation"))
+            .stdout(predicate::str::contains(
+                "configuration does not satisfy the supplied JSON Schema",
+            ))
+            .stdout(predicate::str::contains(SECRET).not());
+    }
+}
+
+#[test]
 fn diff_reports_paths_and_rationale_but_not_values() {
     let directory = tempdir().unwrap();
     let base = directory.path().join("base.json");

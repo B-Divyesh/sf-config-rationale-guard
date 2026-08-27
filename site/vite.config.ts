@@ -11,7 +11,7 @@ export default defineConfig({
     outDir: resolve(siteRoot, '../dist/site'),
     emptyOutDir: true,
     target: 'es2022',
-    sourcemap: true,
+    sourcemap: false,
     rollupOptions: {
       input: {
         home: resolve(siteRoot, 'index.html'),

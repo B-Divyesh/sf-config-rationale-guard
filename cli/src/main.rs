@@ -375,7 +375,7 @@ fn validate_schema(config: &Value, path: &Path) -> Result<Vec<Finding>, String> 
             error(
                 "schema_violation",
                 &issue.instance_path.to_string(),
-                issue.to_string(),
+                "configuration does not satisfy the supplied JSON Schema".into(),
             )
         })
         .collect())

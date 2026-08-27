@@ -66,7 +66,9 @@ JSON, YAML, and TOML are parsed into one JSON data model. Draft 2020-12, draft
 7, draft 6, and draft 4 JSON Schemas can validate all three formats through
 `--schema`; format-specific schema languages are deliberately unsupported.
 Duplicate map keys and non-string YAML keys are rejected. Source config is
-never rewritten, so its formatting and comments remain intact.
+never rewritten, so its formatting and comments remain intact. Schema failures
+report only their JSON Pointer path and a stable validation message; they never
+render the failing configuration value.
 
 ## Team unlock
 

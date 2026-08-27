@@ -515,6 +515,8 @@ code { padding: 2px 5px; background: rgba(20, 93, 120, .09); font-size: .9em; ov
   align-items: center;
 }
 
+.install > * { min-width: 0; }
+
 .install-copy p:not(.kicker) { max-width: 48ch; color: var(--ink-soft); }
 
 .terminal-block {
@@ -678,8 +680,13 @@ footer > p { white-space: nowrap; }
   .result-panel { align-items: flex-start; flex-direction: column; }
   .steps li, .steps li:nth-child(even) { grid-template-columns: 52px minmax(0, 1fr); gap: 16px; margin-left: 0; padding-right: 0; }
   .step-number { width: 44px; height: 44px; }
-  .terminal-block { box-shadow: 7px 7px 0 var(--blue), 12px 12px 0 var(--coral); }
-  .terminal-block pre { font-size: .74rem; }
+  .terminal-block {
+    width: calc(100% - 12px);
+    margin-right: 12px;
+    box-shadow: 7px 7px 0 var(--blue), 12px 12px 0 var(--coral);
+    transform: none;
+  }
+  .terminal-block pre { padding-inline: 16px; font-size: .74rem; }
   .team-ticket { padding: 28px 20px 48px; box-shadow: 6px 6px 0 var(--coral); clip-path: none; }
   .license-panel, .unlock-content { padding: 24px 18px; }
   .license-form > div, .unlock-actions { align-items: stretch; flex-direction: column; }

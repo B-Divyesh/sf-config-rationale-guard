@@ -1,5 +1,5 @@
-const CACHE = 'crg-shell-v1';
-const SHELL = ['/', '/privacy/', '/terms/', '/rationale-press.webp', '/mark.svg'];
+const CACHE = 'crg-shell-v2';
+const SHELL = ['/', '/privacy/', '/terms/', '/rationale-press.webp', '/fraunces-latin-600.woff2', '/mark.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)));
   self.skipWaiting();
@@ -15,5 +15,8 @@ self.addEventListener('fetch', event => {
       caches.open(CACHE).then(cache => cache.put(event.request, response.clone()));
     }
     return response;
+  }).catch(() => {
+    if (event.request.mode === 'navigate') return caches.match('/');
+    return new Response('', { status: 204, statusText: 'Offline' });
   })));
 });
