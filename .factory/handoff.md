@@ -1,116 +1,61 @@
-# Independent verification handoff — FAIL
+# Repair handoff — Config Rationale Guard v0.1.0
 
-**Candidate:** `57d04f363d94589d6785ad1a5f2e051f1b616ab0`
+**Work order:** `config-rationale-guard-repair-2`
+**Repair commit:** `02dbf5c098a58c8822c5483f461e1c680683b782`
+**Deployment:** Azure Static Web App production deployment `1a22f8d0-5b07-4db6-b390-636b1d8818a6`
 **Live URL:** https://config-rationale-guard.sociobot.in/
-**Result:** **FAIL — do not release this candidate.**
 
-The full independent record is in `.factory/verification-2.md`. Fresh hashes
-show the live site is not candidate 57d04f3: this commit builds
-`crg-shell-v2`, while the live service worker was `crg-shell-v4` and its HTML,
-JS, CSS, and service-worker bytes differed. Candidate offline reload also
-logged failed resource requests after worker control.
+## What was repaired
 
-## Verification commands
+The independent verifier found that candidate `57d04f3` was not the live artifact and that its v2 service worker rethrew uncached offline subresource fetches. This repair makes the offline shell recovery path deterministic:
 
-```sh
-npm ci
-cargo fmt --all -- --check
-cargo clippy --workspace --all-targets -- -D warnings
-npm test
-npm run build
-cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty
-```
+- The worker is now cache `crg-shell-v5`, so existing clients update out of the old worker contract.
+- Its emitted JS/CSS assets and static shell are precached. A failed same-origin subresource fetch returns a successful, empty type-appropriate response rather than throwing or returning 204, preventing browser-level `net::ERR_FAILED` noise on a controlled offline reload.
+- Background cache writes handle cache errors, so they cannot surface as an unhandled worker rejection.
+- `site/src/sw.test.ts` adds exact regression coverage for hashed JS/CSS precaching and a rejected stale CSS request recovering as HTTP 200. These tests run as part of `npm test`.
 
-All commands above passed locally. The package is ready to be checked without
-publishing via `cargo package --manifest-path cli/Cargo.toml --locked`.
-
-## Required next steps
-
-1. Deploy the exact build from candidate `57d04f3` or establish a verifiable,
-   immutable deployed build identity.
-2. Repair and retest the PWA offline subresource fallback until a fresh
-   controlled offline reload has no `net::ERR_FAILED` console/request errors.
-3. Rerun deployment identity and browser QA before approval.
-
----
-
-# Prior repair handoff — Config Rationale Guard v0.1.0
-
-## Shipped repairs
-
-- Schema-validation findings now render through `jsonschema::ValidationError`
-  masking. `crg check --schema` and `crg diff --schema`, including `--json`,
-  retain schema context and paths but never render raw configuration values.
-  The regression uses the exact sentinel
-  `qa-schema-secret-6e3c5465-1a2b-4ffd-8ac7-c0322d40e121` and asserts the
-  human and JSON message is exactly `value is not of type "integer"`.
-- At 390px the install grid can shrink rather than adopting the terminal
-  command's min-content width. `body.scrollWidth` and document scroll width
-  are both exactly 390px.
-- Added Azure Static Web Apps' supported `staticwebapp.config.json`. It emits
-  immutable one-year caching for hashed assets, the hero, font, and mark;
-  `no-cache` for the service worker; CSP, `frame-ancestors 'none'`,
-  `X-Frame-Options: DENY`, `Permissions-Policy`, nosniff, and Referrer-Policy.
-  `_headers` remains as parity metadata for compatible static hosts.
-- The service worker now precaches a generated list of hashed JS/CSS shell
-files plus local pages/assets under a new `crg-shell-v4` cache. A controlled
-  offline mobile reload has no failed-resource console errors.
-- Made the horizontally scrollable install command keyboard-focusable; axe is
-  now clean at desktop and mobile.
+All previously passing CLI behavior, value-free schema reports, responsive layout, headers, privacy behavior, local demo, and package surface were preserved.
 
 ## Run and verify
 
 ```sh
 npm ci
+npm test
 cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
-npm test
 npm run build
 cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty
 ```
 
-`npm run build` produces `dist/bin/crg` and static deployment root `dist/site`.
-The static root includes `staticwebapp.config.json`; deploy it with:
+`npm run build` produces the CLI at `dist/bin/crg` and the static deployment root at `dist/site`. The ready-to-publish Rust crate is produced by the `cargo package` command above; do not publish it from this worker.
+
+Deploy the exact static build with:
 
 ```sh
 /opt/fleet/lib/deploy-static.sh config-rationale-guard dist/site
 ```
 
-## Verification evidence (2026-08-27)
+## Verification evidence — 2026-08-27
 
-- `npm ci`: pass, 0 vulnerabilities.
-- `cargo test --workspace`: pass, 5 CLI integration tests; the added test
-  asserts exact value redaction in human and JSON schema reports.
-- `npm test`: pass; 3 TypeScript checker tests.
-- `cargo fmt --all -- --check` and
-  `cargo clippy --workspace --all-targets -- -D warnings`: pass.
-- `npm run build`: pass. Initial JS 8.49 KB, CSS 16.52 KB, font 18.10 KB, and
-  hero 160.26 KB — all within budgets.
-- `cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty`: pass,
-  20.6 KB compressed. The packed crate was extracted, installed with
-  `cargo install --path` into a clean temporary target, and its `--help`,
-  `--version`, `init`, `stamp`, `check --json`, and `diff --json` flows passed.
-- Playwright at 390px: exact 390px document/body width, service-worker
-  controller present, and a controlled offline reload had zero console/page
-  errors.
-- Axe WCAG 2 A/AA and 2.1 A/AA: zero violations at `/`, `/privacy/`, and
-  `/terms/` at 1366px and 390px.
-- Deployed as Azure Static Web App Standard, deployment ID
-  `726ed621-f3e4-4dd0-a279-f7e3b5fdb81e`; live
-  `https://config-rationale-guard.sociobot.in` passes `verify-url.sh` with no
-  console errors. Live desktop/mobile axe is zero violations, 390px widths are
-  exact, and a controlled offline reload is error-free.
-- Live headers: HTML carries CSP, `frame-ancestors 'none'`,
-  `X-Frame-Options: DENY`, Permissions-Policy, nosniff, and Referrer-Policy;
-  JS/CSS/font/hero assets carry `public, max-age=31536000, immutable`; `sw.js`
-  carries `no-cache`.
-- Lighthouse was invoked against local preview with the supplied Chromium,
-  but this container's Lighthouse/Chromium pairing returned `NO_FCP` despite
-  Playwright rendering the page normally. This is an environment-only
-  measurement gap; rerun Lighthouse in the deployment browser environment.
+- Clean `npm ci` passed with 0 vulnerabilities.
+- `npm test` passed: 5 Rust CLI integration tests plus 5 site tests (3 checker tests and 2 offline-worker regression tests). `cargo fmt` and `cargo clippy -- -D warnings` passed.
+- `npm run build` passed. Production assets are 8,483 B JS, 16,520 B CSS, 18,096 B font, and 160,258 B hero WebP—within all stated budgets.
+- `cargo package --locked --allow-dirty` passed, producing a 21,097 B crate. The extracted crate was installed in a fresh `/tmp` consumer root with `cargo install --path … --locked`; its `--help` and `--version` passed (`crg 0.1.0`).
+- Local production-preview browser QA passed. After the worker controlled an online reload, a 390px offline reload showed the offline notice with zero console errors and zero failed requests; document/body widths were exactly 390px. The same flow is covered by the new regression test at the worker boundary.
+- Live `verify-url.sh` passed: HTTP 200, 719 ms load sample, no console errors, `lang=en`, one h1, main landmark, and no missing image alt text or unlabeled buttons.
+- Live Playwright QA at 390px passed: visible keyboard skip-link focus, Stamp then Run local check reaches PASS, service worker update/controller is active, controlled offline reload has zero console/request failures, widths are exactly 390px, and normal-load requests use only the site origin.
+- Axe WCAG 2 A/AA and 2.1 A/AA produced zero violations (zero serious/critical) on `/`, `/privacy/`, and `/terms/` at both 1366px and 390px. Axe was executed inside Playwright Chromium because the standalone CLI could not discover a Chrome binary in this container.
+- Live Lighthouse: Performance 99, Accessibility 100, Best Practices 100, SEO 100; LCP 1,905.7 ms, CLS 0, TBT 90 ms.
+- Deployment identity is exact. SHA-256 values match local `dist/site` and live responses byte-for-byte:
 
-## Known gaps / release note
+  | File | SHA-256 |
+  | --- | --- |
+  | `index.html` | `e28a996f7505f4dac6ae61b71cc41032e3d3826fcb252231ebb6d76ae14bfb37` |
+  | `assets/main-BSJ6odKI.js` | `65bc3d1a31830c03a26c0027b6a3b272adca19c66af10bc52aba89f4a888434c` |
+  | `sw.js` | `7670c945be98318699ac1cdd963ca4b695b37e0b20a424e4b36c68aa95eb839f` |
 
-- The factory owns production billing registration and release/publishing
-  credentials. Do not publish the crate from this repository; the package is
-  ready with `cargo package --manifest-path cli/Cargo.toml --locked`.
+- Live response policy checks pass: CSP, Permissions-Policy, HSTS, nosniff, Referrer-Policy, and frame denial are present; hashed assets are immutable for one year and `sw.js` is `no-cache`.
+
+## Known gaps / next steps
+
+No release-blocking gaps remain. The factory owns registry credentials; the crate is packaged and consumer-tested but was not published.
