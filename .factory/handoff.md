@@ -63,6 +63,15 @@ The static root includes both `staticwebapp.config.json` and the generated
   errors.
 - Axe WCAG 2 A/AA and 2.1 A/AA: zero violations at `/`, `/privacy/`, and
   `/terms/` at 1366px and 390px.
+- Deployed as Azure Static Web App Standard, deployment ID
+  `726ed621-f3e4-4dd0-a279-f7e3b5fdb81e`; live
+  `https://config-rationale-guard.sociobot.in` passes `verify-url.sh` with no
+  console errors. Live desktop/mobile axe is zero violations, 390px widths are
+  exact, and a controlled offline reload is error-free.
+- Live headers: HTML carries CSP, `frame-ancestors 'none'`,
+  `X-Frame-Options: DENY`, Permissions-Policy, nosniff, and Referrer-Policy;
+  JS/CSS/font/hero assets carry `public, max-age=31536000, immutable`; `sw.js`
+  carries `no-cache`.
 - Lighthouse was invoked against local preview with the supplied Chromium,
   but this container's Lighthouse/Chromium pairing returned `NO_FCP` despite
   Playwright rendering the page normally. This is an environment-only
@@ -73,6 +82,3 @@ The static root includes both `staticwebapp.config.json` and the generated
 - The factory owns production billing registration and release/publishing
   credentials. Do not publish the crate from this repository; the package is
   ready with `cargo package --manifest-path cli/Cargo.toml --locked`.
-- Deploy and then verify the response headers on the live custom domain. The
-  committed static configuration is the Azure SWA mechanism that replaces the
-  previously ignored `_headers` file.
