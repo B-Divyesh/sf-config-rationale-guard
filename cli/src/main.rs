@@ -375,7 +375,10 @@ fn validate_schema(config: &Value, path: &Path) -> Result<Vec<Finding>, String> 
             error(
                 "schema_violation",
                 &issue.instance_path.to_string(),
-                issue.to_string(),
+                // jsonschema's default Display implementation includes the instance value.
+                // Reports are designed for CI logs, so always use the crate's explicit
+                // value-masking formatter instead.
+                issue.masked().to_string(),
             )
         })
         .collect())

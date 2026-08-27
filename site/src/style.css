@@ -515,10 +515,13 @@ code { padding: 2px 5px; background: rgba(20, 93, 120, .09); font-size: .9em; ov
   align-items: center;
 }
 
+.install-copy { min-width: 0; }
 .install-copy p:not(.kicker) { max-width: 48ch; color: var(--ink-soft); }
 
 .terminal-block {
   position: relative;
+  min-width: 0;
+  max-width: 100%;
   border: 2px solid var(--ink);
   background: #101813;
   color: #e9eedf;

@@ -1,45 +1,29 @@
-# Verification status — FAIL
+# Repair handoff — Config Rationale Guard v0.1.0
 
-Independent QA on 2026-08-27 rejected candidate
-`137d88f54c99f8101ec1dd5efa324f1b152b36aa`. `crg check --schema` leaks raw
-configuration values in schema-validation reports, violating the brief's
-privacy constraint. The live URL https://config-rationale-guard.sociobot.in
-is byte-identical to this candidate and is affected.
+Repaired QA report `412b575d8a6b450b031ebb2d9e4c237bb1f26ccd` for candidate
+`137d88f54c99f8101ec1dd5efa324f1b152b36aa`.
 
-See `.factory/verification.md` for exact reproduction and all evidence. Do
-not publish or approve this candidate. Required remediation: value-free schema
-errors plus regression tests; fix the 390 px horizontal overflow; configure
-the deployed cache and response-policy headers; then rerun independent QA.
+## Shipped repairs
 
-Verified commands: `npm ci`, `cargo fmt --all -- --check`, `cargo clippy
---workspace --all-targets -- -D warnings`, `npm test`, `npm run build`, and
-`cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty`.
-
-# Original build handoff — Config Rationale Guard v0.1.0
-
-## Shipped
-
-- A release-buildable Rust/Clap `crg` binary with four non-interactive commands:
-  `init`, `stamp`, `check`, and `diff`.
-- Strict JSON (including duplicate-key rejection), YAML, and TOML normalization;
-  explicit JSON Schema validation for every supported config format.
-- Adjacent `.rationale.json` records with JSON Pointer targets, SHA-256 value
-  fingerprints, owner/policy/review metadata, wildcard coverage rules, orphan
-  detection, and overdue/stale checks.
-- Human and `--json` reports with stable exit codes. Reports include changed
-  paths and human rationale but never configuration values.
-- A responsive static documentation site at `dist/site`, including a fully
-  local browser checker, install documentation, first-class empty/error/offline
-  states, privacy and terms pages, a versioned service-worker shell, and a
-  one-time $49 Team unlock.
-- The Team flow implements the Sociobot contract: hosted buy link, returned
-  license capture and URL stripping, local storage, at-most-daily background
-  verification, optimistic cached offline access, invalid-license locking, and
-  paste-to-restore. Core validation, reports, and export remain free.
-- The required original risograph hero illustration (157 KB WebP), generated
-  with the factory image deployment. The exact prompt/deployment metadata is in
-  `site/public/rationale-press.provenance.json`; visual tokens and rationale are
-  in `.factory/design.md`.
+- Schema-validation findings now render through `jsonschema::ValidationError`
+  masking. `crg check --schema` and `crg diff --schema`, including `--json`,
+  retain schema context and paths but never render raw configuration values.
+  The regression uses the exact sentinel
+  `qa-schema-secret-6e3c5465-1a2b-4ffd-8ac7-c0322d40e121` and asserts the
+  human and JSON message is exactly `value is not of type "integer"`.
+- At 390px the install grid can shrink rather than adopting the terminal
+  command's min-content width. `body.scrollWidth` and document scroll width
+  are both exactly 390px.
+- Added Azure Static Web Apps' supported `staticwebapp.config.json`. It emits
+  immutable one-year caching for hashed assets, the hero, font, and mark;
+  `no-cache` for the service worker; CSP, `frame-ancestors 'none'`,
+  `X-Frame-Options: DENY`, `Permissions-Policy`, nosniff, and Referrer-Policy.
+  `_headers` remains as parity metadata for compatible static hosts.
+- The service worker now precaches a generated list of hashed JS/CSS shell
+  files plus local pages/assets under a new `crg-shell-v2` cache. A controlled
+  offline mobile reload has no failed-resource console errors.
+- Made the horizontally scrollable install command keyboard-focusable; axe is
+  now clean at desktop and mobile.
 
 ## Run and verify
 
@@ -47,42 +31,48 @@ Verified commands: `npm ci`, `cargo fmt --all -- --check`, `cargo clippy
 npm ci
 npm test
 npm run build
-dist/bin/crg --help
-cargo package --manifest-path cli/Cargo.toml --locked
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets -- -D warnings
+cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty
 ```
 
-`npm run build` is the reproducible work-order build command. It produces the
-single CLI binary at `dist/bin/crg` and the static deployment root (including
-`index.html`) at `dist/site`.
+`npm run build` produces `dist/bin/crg` and static deployment root `dist/site`.
+The static root includes both `staticwebapp.config.json` and the generated
+`shell-assets.json`; deploy it with:
 
-Verification completed on 2026-08-27:
+```sh
+/opt/fleet/lib/deploy-static.sh config-rationale-guard dist/site
+```
 
-- `cargo fmt --all -- --check`: pass.
-- `cargo clippy --workspace --all-targets -- -D warnings`: pass.
-- `npm test`: pass — 4 CLI integration tests and 3 browser-checker tests.
-- `npm run build`: pass from the locked dependency state.
-- `cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty`: pass;
-  75.6 KiB package / 20.2 KiB compressed.
-- Factory `verify-url.sh` on desktop and 390 px: pass; no console errors, one
-  `h1`, `lang`, `main`, image alt, or unnamed-button failures.
-- Axe Core WCAG 2 A/AA and 2.1 A/AA on `/`, `/privacy/`, and `/terms/` at both
-  1366 px and 390 px: zero violations (and zero serious/critical findings).
-- Playwright mobile smoke: local stamp → pass, edited value → stale, malformed
-  JSON → error, and mocked returned-license verification → unlocked; pass.
-- Lighthouse mobile: Performance 99, Accessibility 100, Best Practices 100,
-  SEO 92; LCP 2.0 s, CLS 0, total blocking time 0 ms.
-- Initial assets: JS 8.54 KB, CSS 16.39 KB, font 18.10 KB, hero 157 KB — all
-  below the product budgets.
+## Verification evidence (2026-08-27)
 
-## Known gaps and release steps
+- `npm ci`: pass, 0 vulnerabilities.
+- `cargo test --workspace`: pass, 5 CLI integration tests; the added test
+  asserts exact value redaction in human and JSON schema reports.
+- `npm test`: pass; 3 TypeScript checker tests.
+- `cargo fmt --all -- --check` and
+  `cargo clippy --workspace --all-targets -- -D warnings`: pass.
+- `npm run build`: pass. Initial JS 8.54 KB, CSS 16.44 KB, font 18.10 KB, and
+  hero 160.26 KB — all within budgets.
+- `cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty`: pass,
+  20.6 KB compressed. The packed crate was extracted, installed with
+  `cargo install --path` into a clean temporary target, and its `--help`,
+  `--version`, `init`, `stamp`, `check --json`, and `diff --json` flows passed.
+- Playwright at 390px: exact 390px document/body width, service-worker
+  controller present, and a controlled offline reload had zero console/page
+  errors.
+- Axe WCAG 2 A/AA and 2.1 A/AA: zero violations at `/`, `/privacy/`, and
+  `/terms/` at 1366px and 390px.
+- Lighthouse was invoked against local preview with the supplied Chromium,
+  but this container's Lighthouse/Chromium pairing returned `NO_FCP` despite
+  Playwright rendering the page normally. This is an environment-only
+  measurement gap; rerun Lighthouse in the deployment browser environment.
 
-- The factory still needs to register the production billing product before a
-  real checkout can succeed. No product ID or payment-provider integration is
-  embedded; the page intentionally uses the slug-based Sociobot production
-  endpoint from the contract.
-- Release binaries are not cross-compiled or attached here. The factory owns
-  registry/release credentials; `cargo package --manifest-path cli/Cargo.toml
-  --locked` is ready for its publishing workflow.
-- JSON Schema is the only schema language by design. CUE, OpenAPI-specific
-  dialect extensions, JSONC source files, and format-specific schema languages
-  remain explicit non-goals for v1.
+## Known gaps / release note
+
+- The factory owns production billing registration and release/publishing
+  credentials. Do not publish the crate from this repository; the package is
+  ready with `cargo package --manifest-path cli/Cargo.toml --locked`.
+- Deploy and then verify the response headers on the live custom domain. The
+  committed static configuration is the Azure SWA mechanism that replaces the
+  previously ignored `_headers` file.
