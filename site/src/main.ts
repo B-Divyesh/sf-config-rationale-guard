@@ -205,7 +205,5 @@ setupLicense();
 setupNetworkState();
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  const registerServiceWorker = () => void navigator.serviceWorker.register('/sw.js');
-  if (document.readyState === 'complete') registerServiceWorker();
-  else window.addEventListener('load', registerServiceWorker, { once: true });
+  void navigator.serviceWorker.register('/sw.js');
 }
