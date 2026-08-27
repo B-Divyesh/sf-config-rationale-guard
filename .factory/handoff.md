@@ -1,88 +1,79 @@
-# Verification status — FAIL
+# Repair handoff — Config Rationale Guard v0.1.0
 
-Independent QA on 2026-08-27 rejected candidate
-`137d88f54c99f8101ec1dd5efa324f1b152b36aa`. `crg check --schema` leaks raw
-configuration values in schema-validation reports, violating the brief's
-privacy constraint. The live URL https://config-rationale-guard.sociobot.in
-is byte-identical to this candidate and is affected.
+## Completed
 
-See `.factory/verification.md` for exact reproduction and all evidence. Do
-not publish or approve this candidate. Required remediation: value-free schema
-errors plus regression tests; fix the 390 px horizontal overflow; configure
-the deployed cache and response-policy headers; then rerun independent QA.
+- Removed the schema-report value disclosure. `schema_violation` now reports
+  only its JSON Pointer path and the stable message `configuration does not
+  satisfy the supplied JSON Schema`; it never stringifies a validator error or
+  renders the failing instance.
+- Added exact CLI regressions using the sentinel
+  `QA_SCHEMA_SECRET_DO_NOT_REPORT_7c75506b`. Both human and `--json` schema
+  reports must contain `schema_violation` and the stable message while omitting
+  the sentinel.
+- Fixed the 390px Install-section overflow by allowing its grid children to
+  shrink and flattening the terminal treatment inside the mobile reading width.
+  The horizontally scrollable command block is now keyboard focusable.
+- Replaced the static-host-ignored `_headers` approach with emitted Azure Static
+  Web Apps configuration. Content-hashed `/assets/*` receive one-year
+  immutable caching; documents revalidate; `/sw.js` is no-cache/no-store.
+  Production responses now carry a self-only CSP (with the Sociobot license
+  API explicitly allowed for `connect-src`), `X-Frame-Options: DENY`, and a
+  restrictive Permissions-Policy.
+- Versioned the service-worker cache, precached the local font, disabled
+  production source maps, and return safe cached/empty offline fallbacks so an
+  offline reload stays usable without failed-resource console errors.
 
-Verified commands: `npm ci`, `cargo fmt --all -- --check`, `cargo clippy
---workspace --all-targets -- -D warnings`, `npm test`, `npm run build`, and
-`cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty`.
+## Verification
 
-# Original build handoff — Config Rationale Guard v0.1.0
-
-## Shipped
-
-- A release-buildable Rust/Clap `crg` binary with four non-interactive commands:
-  `init`, `stamp`, `check`, and `diff`.
-- Strict JSON (including duplicate-key rejection), YAML, and TOML normalization;
-  explicit JSON Schema validation for every supported config format.
-- Adjacent `.rationale.json` records with JSON Pointer targets, SHA-256 value
-  fingerprints, owner/policy/review metadata, wildcard coverage rules, orphan
-  detection, and overdue/stale checks.
-- Human and `--json` reports with stable exit codes. Reports include changed
-  paths and human rationale but never configuration values.
-- A responsive static documentation site at `dist/site`, including a fully
-  local browser checker, install documentation, first-class empty/error/offline
-  states, privacy and terms pages, a versioned service-worker shell, and a
-  one-time $49 Team unlock.
-- The Team flow implements the Sociobot contract: hosted buy link, returned
-  license capture and URL stripping, local storage, at-most-daily background
-  verification, optimistic cached offline access, invalid-license locking, and
-  paste-to-restore. Core validation, reports, and export remain free.
-- The required original risograph hero illustration (157 KB WebP), generated
-  with the factory image deployment. The exact prompt/deployment metadata is in
-  `site/public/rationale-press.provenance.json`; visual tokens and rationale are
-  in `.factory/design.md`.
-
-## Run and verify
+Run from a clean clone:
 
 ```sh
 npm ci
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets -- -D warnings
 npm test
 npm run build
-dist/bin/crg --help
-cargo package --manifest-path cli/Cargo.toml --locked
+cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty
 ```
 
-`npm run build` is the reproducible work-order build command. It produces the
-single CLI binary at `dist/bin/crg` and the static deployment root (including
-`index.html`) at `dist/site`.
+Completed on 2026-08-27:
 
-Verification completed on 2026-08-27:
+- Rust format and clippy passed. `npm test` passed: 5 CLI integration tests
+  (including the human/JSON schema-redaction sentinel regression) and 3 site
+  checker tests.
+- `npm run build` passed and produced `dist/bin/crg` plus `dist/site`.
+  Production assets are 8.49 KB JS, 16.49 KB CSS, 18.10 KB local font, and
+  160.26 KB hero WebP.
+- `cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty` passed
+  (20.4 KiB compressed). The crate was extracted, installed into an isolated
+  consumer root with `cargo install --path ... --locked`, and exercised with
+  `--help`, `init`, and schema `check --json`; the consumer secret did not
+  appear in the saved report.
+- Local and live `verify-url.sh` passed with title, `lang`, one `h1`, `main`,
+  image alt text, and zero page/console errors.
+- Axe Core WCAG 2 A/AA and 2.1 A/AA returned zero violations for `/`,
+  `/privacy/`, and `/terms/` at 1366px and 390px. The live home document and
+  body both measured exactly 390px at the 390px viewport.
+- A controlled live offline reload rendered the page and offline notice with no
+  console errors.
+- Live header checks confirmed `Cache-Control: public, max-age=31536000,
+  immutable` for `/assets/*`, `no-cache, no-store, must-revalidate` for
+  `/sw.js`, and CSP, X-Frame-Options, Permissions-Policy, nosniff, and
+  Referrer-Policy on production responses.
 
-- `cargo fmt --all -- --check`: pass.
-- `cargo clippy --workspace --all-targets -- -D warnings`: pass.
-- `npm test`: pass — 4 CLI integration tests and 3 browser-checker tests.
-- `npm run build`: pass from the locked dependency state.
-- `cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty`: pass;
-  75.6 KiB package / 20.2 KiB compressed.
-- Factory `verify-url.sh` on desktop and 390 px: pass; no console errors, one
-  `h1`, `lang`, `main`, image alt, or unnamed-button failures.
-- Axe Core WCAG 2 A/AA and 2.1 A/AA on `/`, `/privacy/`, and `/terms/` at both
-  1366 px and 390 px: zero violations (and zero serious/critical findings).
-- Playwright mobile smoke: local stamp → pass, edited value → stale, malformed
-  JSON → error, and mocked returned-license verification → unlocked; pass.
-- Lighthouse mobile: Performance 99, Accessibility 100, Best Practices 100,
-  SEO 92; LCP 2.0 s, CLS 0, total blocking time 0 ms.
-- Initial assets: JS 8.54 KB, CSS 16.39 KB, font 18.10 KB, hero 157 KB — all
-  below the product budgets.
+## Deployment
 
-## Known gaps and release steps
+Committed product repair: `61623cc2bbeb2517191b12bce4b7fade0649fa33`
 
-- The factory still needs to register the production billing product before a
-  real checkout can succeed. No product ID or payment-provider integration is
-  embedded; the page intentionally uses the slug-based Sociobot production
-  endpoint from the contract.
-- Release binaries are not cross-compiled or attached here. The factory owns
-  registry/release credentials; `cargo package --manifest-path cli/Cargo.toml
-  --locked` is ready for its publishing workflow.
-- JSON Schema is the only schema language by design. CUE, OpenAPI-specific
-  dialect extensions, JSONC source files, and format-specific schema languages
-  remain explicit non-goals for v1.
+Deployed as a Standard Azure Static Web App to
+https://config-rationale-guard.sociobot.in on 2026-08-27. No registry publish
+was performed; the factory owns release credentials.
+
+## Known gaps / next steps
+
+- The Team billing product still needs factory registration before real hosted
+  checkout can complete. The client remains scoped to the required Sociobot API
+  contract and core CLI features remain free.
+- Release binaries are not cross-compiled or attached here. The verified crate
+  is ready for the factory publishing workflow with the `cargo package` command
+  above.
