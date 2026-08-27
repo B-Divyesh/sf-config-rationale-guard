@@ -205,5 +205,5 @@ setupLicense();
 setupNetworkState();
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  void navigator.serviceWorker.register('/sw.js');
+  window.setTimeout(() => void navigator.serviceWorker.register('/sw.js'), 0);
 }
