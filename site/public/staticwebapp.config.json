@@ -4,7 +4,7 @@
     "exclude": ["/assets/*", "/*.{css,js,png,jpg,svg,webp,ico,woff2,json,txt,xml,wasm}"]
   },
   "globalHeaders": {
-    "Content-Security-Policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://api.sociobot.in; font-src 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; img-src 'self' data:; object-src 'none'; script-src 'self'; style-src 'self'; worker-src 'self'",
+    "Content-Security-Policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; frame-src 'none'; form-action 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.sociobot.in; worker-src 'self'; upgrade-insecure-requests",
     "Permissions-Policy": "camera=(), geolocation=(), microphone=(), payment=(), usb=()",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "X-Content-Type-Options": "nosniff",
@@ -13,21 +13,23 @@
   "routes": [
     {
       "route": "/assets/*",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable"
-      }
+      "headers": { "Cache-Control": "public, max-age=31536000, immutable" }
+    },
+    {
+      "route": "/rationale-press.webp",
+      "headers": { "Cache-Control": "public, max-age=31536000, immutable" }
+    },
+    {
+      "route": "/fraunces-latin-600.woff2",
+      "headers": { "Cache-Control": "public, max-age=31536000, immutable" }
+    },
+    {
+      "route": "/mark.svg",
+      "headers": { "Cache-Control": "public, max-age=31536000, immutable" }
     },
     {
       "route": "/sw.js",
-      "headers": {
-        "Cache-Control": "no-cache, no-store, must-revalidate"
-      }
-    },
-    {
-      "route": "/*",
-      "headers": {
-        "Cache-Control": "public, max-age=0, must-revalidate"
-      }
+      "headers": { "Cache-Control": "no-cache" }
     }
   ]
 }

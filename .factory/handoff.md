@@ -1,31 +1,31 @@
 # Repair handoff — Config Rationale Guard v0.1.0
 
-## Completed
+Repaired QA report `412b575d8a6b450b031ebb2d9e4c237bb1f26ccd` for candidate
+`137d88f54c99f8101ec1dd5efa324f1b152b36aa`.
 
-- Removed the schema-report value disclosure. `schema_violation` now reports
-  only its JSON Pointer path and the stable message `configuration does not
-  satisfy the supplied JSON Schema`; it never stringifies a validator error or
-  renders the failing instance.
-- Added exact CLI regressions using the sentinel
-  `QA_SCHEMA_SECRET_DO_NOT_REPORT_7c75506b`. Both human and `--json` schema
-  reports must contain `schema_violation` and the stable message while omitting
-  the sentinel.
-- Fixed the 390px Install-section overflow by allowing its grid children to
-  shrink and flattening the terminal treatment inside the mobile reading width.
-  The horizontally scrollable command block is now keyboard focusable.
-- Replaced the static-host-ignored `_headers` approach with emitted Azure Static
-  Web Apps configuration. Content-hashed `/assets/*` receive one-year
-  immutable caching; documents revalidate; `/sw.js` is no-cache/no-store.
-  Production responses now carry a self-only CSP (with the Sociobot license
-  API explicitly allowed for `connect-src`), `X-Frame-Options: DENY`, and a
-  restrictive Permissions-Policy.
-- Versioned the service-worker cache, precached the local font, disabled
-  production source maps, and return safe cached/empty offline fallbacks so an
-  offline reload stays usable without failed-resource console errors.
+## Shipped repairs
 
-## Verification
+- Schema-validation findings now render through `jsonschema::ValidationError`
+  masking. `crg check --schema` and `crg diff --schema`, including `--json`,
+  retain schema context and paths but never render raw configuration values.
+  The regression uses the exact sentinel
+  `qa-schema-secret-6e3c5465-1a2b-4ffd-8ac7-c0322d40e121` and asserts the
+  human and JSON message is exactly `value is not of type "integer"`.
+- At 390px the install grid can shrink rather than adopting the terminal
+  command's min-content width. `body.scrollWidth` and document scroll width
+  are both exactly 390px.
+- Added Azure Static Web Apps' supported `staticwebapp.config.json`. It emits
+  immutable one-year caching for hashed assets, the hero, font, and mark;
+  `no-cache` for the service worker; CSP, `frame-ancestors 'none'`,
+  `X-Frame-Options: DENY`, `Permissions-Policy`, nosniff, and Referrer-Policy.
+  `_headers` remains as parity metadata for compatible static hosts.
+- The service worker now precaches a generated list of hashed JS/CSS shell
+files plus local pages/assets under a new `crg-shell-v3` cache. A controlled
+  offline mobile reload has no failed-resource console errors.
+- Made the horizontally scrollable install command keyboard-focusable; axe is
+  now clean at desktop and mobile.
 
-Run from a clean clone:
+## Run and verify
 
 ```sh
 npm ci
@@ -36,44 +36,49 @@ npm run build
 cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty
 ```
 
-Completed on 2026-08-27:
+`npm run build` produces `dist/bin/crg` and static deployment root `dist/site`.
+The static root includes both `staticwebapp.config.json` and the generated
+`shell-assets.json`; deploy it with:
 
-- Rust format and clippy passed. `npm test` passed: 5 CLI integration tests
-  (including the human/JSON schema-redaction sentinel regression) and 3 site
-  checker tests.
-- `npm run build` passed and produced `dist/bin/crg` plus `dist/site`.
-  Production assets are 8.49 KB JS, 16.49 KB CSS, 18.10 KB local font, and
-  160.26 KB hero WebP.
-- `cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty` passed
-  (20.4 KiB compressed). The crate was extracted, installed into an isolated
-  consumer root with `cargo install --path ... --locked`, and exercised with
-  `--help`, `init`, and schema `check --json`; the consumer secret did not
-  appear in the saved report.
-- Local and live `verify-url.sh` passed with title, `lang`, one `h1`, `main`,
-  image alt text, and zero page/console errors.
-- Axe Core WCAG 2 A/AA and 2.1 A/AA returned zero violations for `/`,
-  `/privacy/`, and `/terms/` at 1366px and 390px. The live home document and
-  body both measured exactly 390px at the 390px viewport.
-- A controlled live offline reload rendered the page and offline notice with no
-  console errors.
-- Live header checks confirmed `Cache-Control: public, max-age=31536000,
-  immutable` for `/assets/*`, `no-cache, no-store, must-revalidate` for
-  `/sw.js`, and CSP, X-Frame-Options, Permissions-Policy, nosniff, and
-  Referrer-Policy on production responses.
+```sh
+/opt/fleet/lib/deploy-static.sh config-rationale-guard dist/site
+```
 
-## Deployment
+## Verification evidence (2026-08-27)
 
-Committed product repair: `61623cc2bbeb2517191b12bce4b7fade0649fa33`
+- `npm ci`: pass, 0 vulnerabilities.
+- `cargo test --workspace`: pass, 5 CLI integration tests; the added test
+  asserts exact value redaction in human and JSON schema reports.
+- `npm test`: pass; 3 TypeScript checker tests.
+- `cargo fmt --all -- --check` and
+  `cargo clippy --workspace --all-targets -- -D warnings`: pass.
+- `npm run build`: pass. Initial JS 8.49 KB, CSS 16.52 KB, font 18.10 KB, and
+  hero 160.26 KB — all within budgets.
+- `cargo package --manifest-path cli/Cargo.toml --locked --allow-dirty`: pass,
+  20.6 KB compressed. The packed crate was extracted, installed with
+  `cargo install --path` into a clean temporary target, and its `--help`,
+  `--version`, `init`, `stamp`, `check --json`, and `diff --json` flows passed.
+- Playwright at 390px: exact 390px document/body width, service-worker
+  controller present, and a controlled offline reload had zero console/page
+  errors.
+- Axe WCAG 2 A/AA and 2.1 A/AA: zero violations at `/`, `/privacy/`, and
+  `/terms/` at 1366px and 390px.
+- Deployed as Azure Static Web App Standard, deployment ID
+  `726ed621-f3e4-4dd0-a279-f7e3b5fdb81e`; live
+  `https://config-rationale-guard.sociobot.in` passes `verify-url.sh` with no
+  console errors. Live desktop/mobile axe is zero violations, 390px widths are
+  exact, and a controlled offline reload is error-free.
+- Live headers: HTML carries CSP, `frame-ancestors 'none'`,
+  `X-Frame-Options: DENY`, Permissions-Policy, nosniff, and Referrer-Policy;
+  JS/CSS/font/hero assets carry `public, max-age=31536000, immutable`; `sw.js`
+  carries `no-cache`.
+- Lighthouse was invoked against local preview with the supplied Chromium,
+  but this container's Lighthouse/Chromium pairing returned `NO_FCP` despite
+  Playwright rendering the page normally. This is an environment-only
+  measurement gap; rerun Lighthouse in the deployment browser environment.
 
-Deployed as a Standard Azure Static Web App to
-https://config-rationale-guard.sociobot.in on 2026-08-27. No registry publish
-was performed; the factory owns release credentials.
+## Known gaps / release note
 
-## Known gaps / next steps
-
-- The Team billing product still needs factory registration before real hosted
-  checkout can complete. The client remains scoped to the required Sociobot API
-  contract and core CLI features remain free.
-- Release binaries are not cross-compiled or attached here. The verified crate
-  is ready for the factory publishing workflow with the `cargo package` command
-  above.
+- The factory owns production billing registration and release/publishing
+  credentials. Do not publish the crate from this repository; the package is
+  ready with `cargo package --manifest-path cli/Cargo.toml --locked`.

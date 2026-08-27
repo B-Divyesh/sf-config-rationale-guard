@@ -102,10 +102,10 @@ fn schema_and_duplicate_json_are_rejected() {
 }
 
 #[test]
-fn schema_reports_redact_the_failing_value_in_human_and_json_output() {
-    const SECRET: &str = "QA_SCHEMA_SECRET_DO_NOT_REPORT_7c75506b";
+fn schema_reports_mask_values_in_human_and_json_output() {
+    const SECRET: &str = "qa-schema-secret-6e3c5465-1a2b-4ffd-8ac7-c0322d40e121";
     let directory = tempdir().unwrap();
-    let config = directory.path().join("secrets.json");
+    let config = directory.path().join("secret.json");
     let schema = directory.path().join("schema.json");
     fs::write(&config, format!(r#"{{"token":"{SECRET}"}}"#)).unwrap();
     fs::write(
@@ -118,26 +118,49 @@ fn schema_reports_redact_the_failing_value_in_human_and_json_output() {
         .assert()
         .success();
 
-    for output in [false, true] {
-        let mut command = crg();
-        command.args([
+    let human = crg()
+        .args([
             "check",
             config.to_str().unwrap(),
             "--schema",
             schema.to_str().unwrap(),
-        ]);
-        if output {
-            command.arg("--json");
-        }
-        command
-            .assert()
-            .code(1)
-            .stdout(predicate::str::contains("schema_violation"))
-            .stdout(predicate::str::contains(
-                "configuration does not satisfy the supplied JSON Schema",
-            ))
-            .stdout(predicate::str::contains(SECRET).not());
-    }
+        ])
+        .assert()
+        .code(1)
+        .stdout(predicate::str::contains("schema_violation"))
+        .stdout(predicate::str::contains(SECRET).not())
+        .get_output()
+        .stdout
+        .clone();
+    assert!(
+        String::from_utf8(human)
+            .unwrap()
+            .contains("value is not of type \"integer\"")
+    );
+
+    let json = crg()
+        .args([
+            "check",
+            config.to_str().unwrap(),
+            "--schema",
+            schema.to_str().unwrap(),
+            "--json",
+        ])
+        .assert()
+        .code(1)
+        .stdout(predicate::str::contains(SECRET).not())
+        .get_output()
+        .stdout
+        .clone();
+    let report: Value = serde_json::from_slice(&json).unwrap();
+    let finding = report["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|finding| finding["code"] == "schema_violation")
+        .unwrap();
+    assert_eq!(finding["path"], "/token");
+    assert_eq!(finding["message"], "value is not of type \"integer\"");
 }
 
 #[test]
