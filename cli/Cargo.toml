@@ -1,0 +1,31 @@
+[package]
+name = "config-rationale-guard"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "Keep human rationale reviewable beside strict configuration"
+license = "MIT"
+repository = "https://github.com/B-Divyesh/sf-config-rationale-guard"
+readme = "../README.md"
+keywords = ["configuration", "policy", "ci", "json-schema"]
+categories = ["command-line-utilities", "development-tools"]
+
+[[bin]]
+name = "crg"
+path = "src/main.rs"
+
+[dependencies]
+chrono = { version = "0.4.41", default-features = false, features = ["clock", "serde"] }
+clap = { version = "4.5.46", features = ["derive"] }
+jsonschema = { version = "0.33.0", default-features = false }
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.143"
+serde_yaml = "0.9.34"
+sha2 = "0.10.9"
+toml = "0.9.5"
+
+[dev-dependencies]
+assert_cmd = "2.0.17"
+predicates = "3.1.3"
+tempfile = "3.21.0"
+
