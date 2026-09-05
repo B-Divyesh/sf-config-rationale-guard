@@ -1,0 +1,1 @@
+Keep configuration decisions reviewable in CI with adjacent rationale checks for JSON, YAML, and TOML.

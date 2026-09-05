@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --config site/vite.config.ts",
-    "test": "cargo test --workspace && npm run test:site",
+    "test": "cargo test --workspace && npm run test:site && npm run test:claims",
     "test:site": "tsc -p site/tsconfig.json && vitest run --config site/vitest.config.ts",
+    "test:claims": "playwright test --config site/playwright.config.ts",
     "build:cli": "cargo build --release --locked && mkdir -p dist/bin && cp target/release/crg dist/bin/crg",
     "build:site": "vite build --config site/vite.config.ts",
     "build": "npm run clean && npm run build:cli && npm run build:site",
@@ -14,6 +15,8 @@
     "preview": "vite preview --config site/vite.config.ts"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.11.1",
+    "@playwright/test": "1.58.2",
     "@types/node": "^24.3.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.3",

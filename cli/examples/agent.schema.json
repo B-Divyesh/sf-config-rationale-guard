@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["permissions", "retries"],
+  "properties": {
+    "permissions": {
+      "type": "object",
+      "required": ["shell", "network"],
+      "properties": {
+        "shell": { "type": "boolean" },
+        "network": { "enum": ["deny", "allowlist"] }
+      }
+    },
+    "retries": { "type": "integer", "minimum": 0, "maximum": 3 }
+  }
+}

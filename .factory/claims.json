@@ -1,0 +1,107 @@
+[
+  {
+    "id": "one-click-sample",
+    "claim": "Try it with sample data opens a populated sample project.",
+    "where": "landing first screen",
+    "test": "npm run test:claims -- --grep @claim:one-click-sample",
+    "sandbox": "fresh browser context; use the first-screen action; assert the direct demo has populated config and rationale inputs"
+  },
+  {
+    "id": "demo-sandbox",
+    "claim": "Demo edits use a separate local demo space and do not change real local data.",
+    "where": "demo banner and privacy page",
+    "test": "npm run test:claims -- --grep @claim:demo-sandbox",
+    "sandbox": "fresh browser context with a real-data sentinel; edit and stamp the demo; assert only demo: storage changes and Start for real clears it"
+  },
+  {
+    "id": "demo-reset",
+    "claim": "Reset demo restores the shipped sample after a check.",
+    "where": "demo banner",
+    "test": "npm run test:claims -- --grep @claim:demo-reset",
+    "sandbox": "fresh browser context; stamp and check the sample; alter config; reset; assert shipped values and ready result return"
+  },
+  {
+    "id": "browser-local",
+    "claim": "The browser demo sends no input to another origin or analytics service.",
+    "where": "landing data handling section and privacy page",
+    "test": "npm run test:claims -- --grep @claim:browser-local",
+    "sandbox": "fresh browser context; record every request during stamp and check; assert every origin is the site origin"
+  },
+  {
+    "id": "cli-demo",
+    "claim": "crg demo creates and checks a shipped sample project.",
+    "where": "sample CLI run and README",
+    "test": "cargo test --test claims cli_demo_creates_a_real_passing_sample_project",
+    "sandbox": "fresh temporary directory; run the real binary's demo command; run check against the created schema"
+  },
+  {
+    "id": "supported-formats",
+    "claim": "The CLI checks JSON, YAML, and TOML configuration.",
+    "where": "landing description and README",
+    "test": "cargo test --test claims json_yaml_and_toml_complete_the_same_rationale_flow",
+    "sandbox": "fresh temporary directory; initialize, write a rationale, stamp, and check one file of each format"
+  },
+  {
+    "id": "adjacent-rationale",
+    "claim": "The CLI writes a separate adjacent rationale file for settings.",
+    "where": "How it works and README",
+    "test": "cargo test --test claims init_writes_an_adjacent_rationale_file_for_each_setting",
+    "sandbox": "fresh temporary directory; initialize a nested config and inspect its created adjacent sidecar paths"
+  },
+  {
+    "id": "source-preserved",
+    "claim": "The CLI does not rewrite source configuration.",
+    "where": "How it works, data handling, and README",
+    "test": "cargo test --test claims init_and_stamp_leave_the_source_config_byte_for_byte_unchanged",
+    "sandbox": "fresh temporary directory; initialize and stamp commented YAML; compare source bytes before and after"
+  },
+  {
+    "id": "schema-validation",
+    "claim": "The CLI finds schema-invalid configuration with JSON Schema.",
+    "where": "How it works and README",
+    "test": "cargo test --test claims schema_validation_finds_an_invalid_normalized_config",
+    "sandbox": "create the shipped sample then make retries violate its schema; assert the real check exits 1 with a schema finding"
+  },
+  {
+    "id": "decision-findings",
+    "claim": "The CLI finds missing, orphaned, overdue, and stale decision records.",
+    "where": "How it works and README",
+    "test": "cargo test --test claims check_reports_missing_orphaned_overdue_and_stale_decisions",
+    "sandbox": "fresh temporary project with each realistic failure type; assert all four observable finding codes"
+  },
+  {
+    "id": "value-free-reports",
+    "claim": "Reports do not print configuration values.",
+    "where": "data handling section and README",
+    "test": "cargo test --test claims human_and_json_reports_do_not_print_config_values",
+    "sandbox": "schema failure with a unique secret-shaped value; assert human and JSON reports contain the finding but not the value"
+  },
+  {
+    "id": "json-output",
+    "claim": "The check command provides a scriptable JSON report.",
+    "where": "Install section and README",
+    "test": "cargo test --test claims check_json_output_is_a_single_machine_readable_report",
+    "sandbox": "fresh shipped sample; run real check --json; parse the complete stdout as one JSON report"
+  },
+  {
+    "id": "exit-codes",
+    "claim": "The check command exits 0 when valid, 1 for findings, and 2 for unreadable input.",
+    "where": "README",
+    "test": "cargo test --test claims check_uses_documented_success_finding_and_input_exit_codes",
+    "sandbox": "fresh shipped sample; assert the real check returns each documented exit code for valid, stale, and missing input"
+  },
+  {
+    "id": "local-cli",
+    "claim": "The CLI runs locally without an account or setup prompts.",
+    "where": "landing facts and README",
+    "test": "cargo test --test claims cli_demo_runs_in_a_fresh_directory_without_setup_or_network_input",
+    "sandbox": "fresh temporary directory; run the real demo command and assert its passing output without credentials or prompts"
+  },
+  {
+    "id": "mit-license",
+    "claim": "The CLI is MIT licensed.",
+    "where": "landing facts, README, and Terms",
+    "test": "cargo test --test claims distributed_cli_declares_the_mit_license",
+    "sandbox": "compiled package metadata reports the distributed crate license as MIT"
+  }
+]

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://config-rationale-guard.sociobot.in/sitemap.xml

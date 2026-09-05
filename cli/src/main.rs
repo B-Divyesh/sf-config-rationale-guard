@@ -13,7 +13,12 @@ use std::{
     fs,
     path::{Path, PathBuf},
     process::ExitCode,
+    time::{SystemTime, UNIX_EPOCH},
 };
+
+const DEMO_CONFIG: &str = include_str!("../examples/agent.json");
+const DEMO_RATIONALE: &str = include_str!("../examples/agent.json.rationale.json");
+const DEMO_SCHEMA: &str = include_str!("../examples/agent.schema.json");
 
 #[derive(Parser)]
 #[command(
@@ -29,6 +34,8 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Create a temporary, passing sample project and run its local check
+    Demo(DemoArgs),
     /// Create a sidecar with one TODO decision per config leaf
     Init(InitArgs),
     /// Fingerprint reviewed decisions after their rationale has been updated
@@ -37,6 +44,13 @@ enum Command {
     Check(CheckArgs),
     /// Render a value-free report of changed settings and decisions
     Diff(DiffArgs),
+}
+
+#[derive(Args)]
+struct DemoArgs {
+    /// Create the sample project in this directory when its sample files are absent
+    #[arg(short, long)]
+    output: Option<PathBuf>,
 }
 
 #[derive(Args)]
@@ -108,11 +122,71 @@ fn main() -> ExitCode {
 
 fn run(cli: Cli) -> Result<bool, String> {
     match cli.command {
+        Command::Demo(args) => demo(args),
         Command::Init(args) => init(args),
         Command::Stamp(args) => stamp(args),
         Command::Check(args) => check(args),
         Command::Diff(args) => diff(args),
     }
+}
+
+fn demo(args: DemoArgs) -> Result<bool, String> {
+    let directory = args.output.unwrap_or_else(|| {
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|duration| duration.as_nanos())
+            .unwrap_or_default();
+        std::env::temp_dir().join(format!("crg-demo-{}-{nonce}", std::process::id()))
+    });
+    fs::create_dir_all(&directory).map_err(|error| {
+        format!(
+            "could not create demo directory {}: {error}",
+            directory.display()
+        )
+    })?;
+    let config_path = directory.join("agent.json");
+    let rationale_path = directory.join("agent.json.rationale.json");
+    let schema_path = directory.join("agent.schema.json");
+    if [
+        config_path.as_path(),
+        rationale_path.as_path(),
+        schema_path.as_path(),
+    ]
+    .iter()
+    .any(|path| path.exists())
+    {
+        return Err(format!(
+            "demo files already exist in {}; choose an empty directory or another --output path",
+            directory.display()
+        ));
+    }
+
+    fs::write(&config_path, DEMO_CONFIG)
+        .map_err(|error| format!("could not write demo config: {error}"))?;
+    fs::write(&schema_path, DEMO_SCHEMA)
+        .map_err(|error| format!("could not write demo schema: {error}"))?;
+    let (config, _) = load(&config_path)?;
+    let mut rationale: RationaleFile = serde_json::from_str(DEMO_RATIONALE)
+        .map_err(|error| format!("could not load bundled demo rationale: {error}"))?;
+    for decision in &mut rationale.decisions {
+        if let Some(value) = pointer(&config, &decision.path) {
+            decision.value_hash = fingerprint(value);
+        }
+    }
+    write_json(&rationale_path, &rationale)?;
+
+    println!("Sample project created at {}.", directory.display());
+    println!("Files: agent.json, agent.json.rationale.json, agent.schema.json");
+    println!("Running the sample check:");
+
+    check(CheckArgs {
+        common: CommonArgs {
+            config: config_path,
+            rationales: Some(rationale_path),
+            json: false,
+        },
+        schema: Some(schema_path),
+    })
 }
 
 fn sidecar_path(config: &Path) -> PathBuf {

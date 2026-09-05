@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "shell": false,
+    "network": "allowlist"
+  },
+  "retries": 2
+}

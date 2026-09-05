@@ -4,16 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f3ebd7" />
-    <meta name="description" content="Config Rationale Guard privacy policy." />
+    <meta name="description" content="How Config Rationale Guard handles configuration, sample, and site data." />
+    <link rel="canonical" href="https://config-rationale-guard.sociobot.in/privacy/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Privacy — Config Rationale Guard" />
+    <meta property="og:description" content="How Config Rationale Guard handles configuration, sample, and site data." />
+    <meta property="og:image" content="https://config-rationale-guard.sociobot.in/rationale-guard-og.webp" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Privacy — Config Rationale Guard" />
+    <meta name="twitter:description" content="How Config Rationale Guard handles configuration, sample, and site data." />
+    <meta name="twitter:image" content="https://config-rationale-guard.sociobot.in/rationale-guard-og.webp" />
     <title>Privacy — Config Rationale Guard</title>
     <link rel="icon" href="/mark.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/mark-180.png" />
     <link rel="preload" href="/fraunces-latin-600.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <header class="site-header"><a class="wordmark" href="/"><span class="wordmark-mark" aria-hidden="true">CR</span><span>Rationale Guard</span></a><nav aria-label="Primary navigation"><a href="/">Home</a><a href="/terms/">Terms</a></nav></header>
-    <main id="main" class="legal"><p class="kicker"><span>LEGAL</span> Effective 27 August 2026</p><h1>Privacy, in plain text.</h1><p class="legal-lede">The CLI is offline and has no telemetry. The browser demo processes its inputs only in your browser.</p><h2>What stays local</h2><p>Configuration, rationale text, demo input, and generated reports are not sent to us. The site does not use analytics, advertising cookies, or third-party scripts.</p><h2>License storage</h2><p>If you buy or restore the Team unlock, the license token and its latest verification result are stored in your browser’s local storage under keys beginning with <code>sb_license:config-rationale-guard</code>. You can remove them by clearing this site’s storage.</p><h2>License verification and checkout</h2><p>License verification sends only your license token to the Sociobot billing API. Purchases open a Sociobot/Dodo hosted checkout, where the merchant of record processes the contact and payment details needed for the transaction. Their policies apply to that checkout.</p><h2>Contact</h2><p>Privacy questions can be sent to <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a>.</p><p><a class="text-link" href="/">← Return home</a></p></main>
-    <footer><p>© 2026 Sociobot · MIT</p><nav aria-label="Legal links"><a href="/privacy/" aria-current="page">Privacy</a><a href="/terms/">Terms</a></nav></footer>
+    <header class="site-header"><a class="wordmark" href="/"><span class="wordmark-mark" aria-hidden="true">CR</span><span>Rationale Guard</span></a><nav aria-label="Primary navigation"><a href="/demo">Demo</a><a href="/#how-it-works">How it works</a><a class="nav-install" href="/#install">Install</a><a href="/privacy/" aria-current="page">Privacy</a></nav></header>
+    <main id="main" class="legal"><p class="kicker"><span>LEGAL</span> Effective 5 September 2026</p><h1>How this tool handles your data.</h1><p class="legal-lede">The CLI runs locally. The browser demo keeps its sample input in a separate local demo space.</p><h2>Configuration and reports</h2><p>Reports show paths, rationale, and status without configuration values. The CLI does not rewrite the source configuration file.</p><h2>Browser demo</h2><p>The demo processes the shipped sample in your browser. Any temporary input uses a local-storage key beginning with <code>demo:config-rationale-guard:</code>. Resetting the demo or choosing Start for real removes that demo input.</p><h2>Site requests</h2><p>This site makes no requests to analytics, advertising, tracking, or third-party scripts during the demo flow. It serves its own font, image, and script files.</p><h2>Contact</h2><p>Privacy questions can be sent to <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a>.</p><p><a class="text-link" href="/">← Return home</a></p></main>
+    <footer><div><a class="wordmark" href="/"><span class="wordmark-mark" aria-hidden="true">CR</span><span>Rationale Guard</span></a><p>Review configuration decisions before CI runs.</p></div><nav aria-label="Footer links"><a href="/demo">Demo</a><a href="/privacy/" aria-current="page">Privacy</a><a href="/terms/">Terms</a></nav><p>Built by Param Factory · v0.1.0</p></footer>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

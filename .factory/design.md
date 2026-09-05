@@ -58,3 +58,8 @@ Final prompt and deployment metadata live beside the source during generation
 and are copied to `site/public/rationale-press.provenance.json`. The image is
 licensed under the repository's MIT license. All small marks and icons are
 hand-authored CSS/HTML shapes, not third-party assets.
+
+The social image `site/public/rationale-guard-og.webp` is a local 1200×630 WebP
+crop derived from that same original hero illustration on 2026-09-05. The
+180×180 touch icon is an original local crop from the same asset. Neither adds
+an external asset or font dependency.

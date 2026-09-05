@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "pattern": "/permissions/**",
+      "minimumCoverage": 1
+    }
+  ],
+  "decisions": [
+    {
+      "path": "/permissions/shell",
+      "rationale": "Shell access stays off for untrusted automation.",
+      "policy": "SEC-12",
+      "owner": "platform",
+      "valueHash": ""
+    },
+    {
+      "path": "/permissions/network",
+      "rationale": "Jobs may call only the approved package mirror.",
+      "policy": "NET-4",
+      "owner": "platform",
+      "valueHash": ""
+    },
+    {
+      "path": "/retries",
+      "rationale": "Two retries limit duplicate release work.",
+      "policy": "REL-7",
+      "owner": "release",
+      "valueHash": ""
+    }
+  ]
+}

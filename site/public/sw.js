@@ -1,7 +1,7 @@
 // Bump this whenever the shell contract changes so existing clients cannot
 // retain a worker that rethrows offline subresource failures.
-const CACHE = 'crg-shell-v5';
-const STATIC_SHELL = ['/privacy/', '/terms/', '/rationale-press.webp', '/mark.svg', '/fraunces-latin-600.woff2'];
+const CACHE = 'crg-shell-v6';
+const STATIC_SHELL = ['/demo', '/privacy/', '/terms/', '/404.html', '/rationale-press.webp', '/mark.svg', '/fraunces-latin-600.woff2'];
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const homepage = await fetch('/', { cache: 'no-store' });
